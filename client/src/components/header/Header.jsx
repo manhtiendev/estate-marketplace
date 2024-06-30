@@ -27,7 +27,7 @@ export default function Header() {
             <span className='text-slate-700'>Estate</span>
           </h1>
         </Link>
-        <form className='flex items-center p-3 rounded-lg bg-slate-100'>
+        <form className='flex items-center p-2 rounded-lg bg-slate-100'>
           <input
             type='text'
             name='search'
