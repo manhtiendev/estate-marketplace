@@ -5,6 +5,7 @@ import { Input } from '~/components/input';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import OAuth from '~/components/common/OAuth';
 
 const schema = yup.object({
   username: yup.string().required('This field is required'),
@@ -89,6 +90,7 @@ export default function SignUp() {
         >
           {isLoading ? 'Loading...' : 'Sign Up'}
         </button>
+        <OAuth />
       </form>
       <div className='flex gap-2 mt-5 '>
         <p>Have an account? </p>
