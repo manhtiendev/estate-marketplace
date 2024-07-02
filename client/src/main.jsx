@@ -4,10 +4,14 @@ import './index.scss';
 import { BrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Provider } from 'react-redux';
+import { store } from './redux/store.js';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
-    <App />
-    <ToastContainer theme='colored' bodyClassName='text-sm' />
-  </BrowserRouter>
+  <Provider store={store}>
+    <BrowserRouter>
+      <App />
+      <ToastContainer theme='colored' bodyClassName='text-sm' />
+    </BrowserRouter>
+  </Provider>
 );

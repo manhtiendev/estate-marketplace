@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { Input } from '~/components/input';
 import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { signInFailure, signInStart, signInSuccess } from '~/redux/user/userSlice';
 
 const schema = yup.object({
   email: yup.string().email('Invalid email address').required('This field is required'),
@@ -12,8 +14,9 @@ const schema = yup.object({
 });
 
 export default function SignIn() {
-  const [isLoading, setIsLoading] = useState(false);
+  const { loading } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const {
     handleSubmit,
     control,
@@ -24,7 +27,7 @@ export default function SignIn() {
   });
 
   const handleSignIn = async (values) => {
-    setIsLoading(true);
+    dispatch(signInStart());
     try {
       const res = await fetch('http://localhost:3000/v1/auth/signin', {
         method: 'POST',
@@ -37,14 +40,14 @@ export default function SignIn() {
       const data = await res.json();
       if (data.success === false) {
         toast.error(data.message);
-        setIsLoading(false);
+        dispatch(signInFailure(data.message));
         return;
       }
-      setIsLoading(false);
+      dispatch(signInSuccess(data.user));
       toast.success('Login successfully');
       navigate('/');
     } catch (error) {
-      setIsLoading(false);
+      dispatch(signInFailure(error.message));
       toast.error(error.message);
     }
   };
@@ -66,17 +69,17 @@ export default function SignIn() {
           name='password'
         ></Input>
         <button
-          disabled={isLoading}
+          disabled={loading}
           type='submit'
           className='p-3 text-white uppercase rounded-lg bg-slate-700 hover:opacity-95 disabled:opacity-50'
         >
-          {isLoading ? 'Loading...' : 'Sign In'}
+          {loading ? 'Loading...' : 'Sign In'}
         </button>
       </form>
       <div className='flex gap-2 mt-5 '>
         <p>Dont have an account? </p>
         <Link to='/sign-up'>
-          <strong className='text-blue-700'>Sign un</strong>
+          <strong className='text-blue-700'>Sign up</strong>
         </Link>
       </div>
     </div>
