@@ -1,4 +1,5 @@
 import { FaSearch } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { v4 } from 'uuid';
 
@@ -11,13 +12,10 @@ const LIST_LINK = [
     title: 'About',
     url: 'about',
   },
-  {
-    title: 'Log in',
-    url: '/sign-in',
-  },
 ];
 
 export default function Header() {
+  const { currentUser } = useSelector((state) => state.user);
   return (
     <header className='shadow-md bg-slate-200 '>
       <div className='flex items-center justify-between max-w-6xl p-3 mx-auto'>
@@ -43,7 +41,18 @@ export default function Header() {
               <Link to={item.url} key={v4()}>
                 <li className='hidden sm:inline text-slate-700 hover:underline'>{item.title}</li>
               </Link>
-            ))}
+            ))}{' '}
+          <Link to='/profile'>
+            {currentUser ? (
+              <img
+                src={currentUser.avatar}
+                alt='avatar'
+                className='object-cover rounded-full w-7 h-7'
+              />
+            ) : (
+              <li className='hidden sm:inline text-slate-700 hover:underline'>Sign in</li>
+            )}
+          </Link>
         </ul>
       </div>
     </header>
