@@ -54,7 +54,7 @@ export default function SignUp() {
     }
   };
   return (
-    <div className='h-screen max-w-lg p-3 mx-auto'>
+    <div className='max-w-lg p-3 mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Sign Up</h1>
       <form className={`flex flex-col gap-6`} onSubmit={handleSubmit(handleSignUp)}>
         <Input
