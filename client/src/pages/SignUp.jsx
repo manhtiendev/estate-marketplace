@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Input } from '../components/input';
+import { Input } from '~/components/input';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
@@ -18,7 +18,6 @@ const schema = yup.object({
 
 export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
   const {
     handleSubmit,
@@ -41,17 +40,16 @@ export default function SignUp() {
       });
       const data = await res.json();
       if (data.success === false) {
-        setError(data.message);
+        toast.error(data.message);
         setIsLoading(false);
         return;
       }
       setIsLoading(false);
-      setError('');
       toast.success('Registration successful');
       navigate('/sign-in');
     } catch (error) {
       setIsLoading(false);
-      setError(error.message);
+      toast.error(error.message);
     }
   };
   return (
@@ -98,7 +96,6 @@ export default function SignUp() {
           <strong className='text-blue-700'>Sign in</strong>
         </Link>
       </div>
-      {error.length > 0 && <p className='mt-5 text-red-500'>{error}</p>}
     </div>
   );
 }
