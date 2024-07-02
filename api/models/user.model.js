@@ -17,6 +17,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    passwordConfirmation: {
+      type: String,
+      required: true,
+      validate: {
+        validator: function (el) {
+          return el === this.password;
+        },
+        message: 'Password are not the same',
+      },
+    },
   },
   { timestamps: true }
 );
@@ -25,6 +35,7 @@ userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   this.password = await bcryptjs.hash(this.password, 12);
+  this.passwordConfirmation = undefined;
 
   next();
 });

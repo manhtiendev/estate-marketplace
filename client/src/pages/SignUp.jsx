@@ -2,7 +2,9 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Input } from '../components/input';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 const schema = yup.object({
   username: yup.string().required('This field is required'),
@@ -15,6 +17,9 @@ const schema = yup.object({
 });
 
 export default function SignUp() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
   const {
     handleSubmit,
     control,
@@ -23,11 +28,34 @@ export default function SignUp() {
     resolver: yupResolver(schema),
     mode: 'onSubmit',
   });
-  const handleSignUp = (values) => {
-    console.log(values);
+
+  const handleSignUp = async (values) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('http://localhost:3000/v1/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        setError(data.message);
+        setIsLoading(false);
+        return;
+      }
+      setIsLoading(false);
+      setError('');
+      toast.success('Registration successful');
+      navigate('/sign-in');
+    } catch (error) {
+      setIsLoading(false);
+      setError(error.message);
+    }
   };
   return (
-    <div className='max-w-lg p-3 mx-auto'>
+    <div className='h-screen max-w-lg p-3 mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Sign Up</h1>
       <form className={`flex flex-col gap-6`} onSubmit={handleSubmit(handleSignUp)}>
         <Input
@@ -57,10 +85,11 @@ export default function SignUp() {
           error={errors.passwordConfirmation?.message}
         ></Input>
         <button
+          disabled={isLoading}
           type='submit'
-          className='p-3 text-white uppercase rounded-lg bg-slate-700 hover:opacity-95 disabled:opacity-80'
+          className='p-3 text-white uppercase rounded-lg bg-slate-700 hover:opacity-95 disabled:opacity-50'
         >
-          Sign Up
+          {isLoading ? 'Loading...' : 'Sign Up'}
         </button>
       </form>
       <div className='flex gap-2 mt-5 '>
@@ -69,6 +98,7 @@ export default function SignUp() {
           <strong className='text-blue-700'>Sign in</strong>
         </Link>
       </div>
+      {error.length > 0 && <p className='mt-5 text-red-500'>{error}</p>}
     </div>
   );
 }
