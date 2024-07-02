@@ -1,5 +1,4 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useState } from 'react';
 import * as yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,7 +9,7 @@ import { signInFailure, signInStart, signInSuccess } from '~/redux/user/userSlic
 
 const schema = yup.object({
   email: yup.string().email('Invalid email address').required('This field is required'),
-  password: yup.string().required('This field is required').min(8, 'Password must be 8 character'),
+  password: yup.string().required('This field is required'),
 });
 
 export default function SignIn() {

@@ -1,10 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { reducer } from './reducers';
+import { persistedReducer } from './reducers';
+import { persistStore } from 'redux-persist';
 
 export const store = configureStore({
-  reducer,
+  reducer: persistedReducer,
   middleware: (gDM) =>
     gDM({
       serializableCheck: false,
     }),
 });
+
+export const persistor = persistStore(store);
