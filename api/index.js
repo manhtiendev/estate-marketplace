@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import userRouter from '~/routes/user.route';
 import authRouter from '~/routes/auth.route';
+import listingRouter from '~/routes/listing.route';
 import cors from 'cors';
 import { corsOptions } from './config/cors';
 import { env } from './config/environment';
@@ -25,6 +26,7 @@ app.use(cookieParser());
 
 app.use('/v1/users', userRouter);
 app.use('/v1/auth', authRouter);
+app.use('/v1/listing', listingRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
