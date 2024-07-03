@@ -7,6 +7,16 @@ import { env } from '~/config/environment';
 import bcryptjs from 'bcryptjs';
 import removeVietnameseTones from '~/utils/convertVie';
 
+export const verifyToken = catchAsync(async (req, res, next) => {
+  const token = req.cookies.access_token;
+  if (!token) return next(new ApiError(StatusCodes.UNAUTHORIZED, 'No token, authorization denied'));
+  jwt.verify(token, env.JWT_SECRET, (err, user) => {
+    if (err) return next(new ApiError(StatusCodes.FORBIDDEN, 'Forbidden'));
+    req.user = user;
+    next();
+  });
+});
+
 export const signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create(req.body);
   res.status(201).json({

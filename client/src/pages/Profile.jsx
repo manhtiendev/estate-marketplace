@@ -32,6 +32,7 @@ export default function Profile() {
     if (file) {
       handleFileUpload(file);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file]);
 
   const handleFileUpload = async (file) => {
@@ -56,7 +57,7 @@ export default function Profile() {
         //     break;
         // }
       },
-      (error) => {
+      () => {
         setFileUploadError(true);
       },
       () => {

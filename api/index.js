@@ -5,6 +5,8 @@ import authRouter from '~/routes/auth.route';
 import cors from 'cors';
 import { corsOptions } from './config/cors';
 import { env } from './config/environment';
+import cookieParser from 'cookie-parser';
+import ApiError from '~/utils/ApiError';
 
 mongoose
   .connect(env.MONGO_URI)
@@ -18,6 +20,8 @@ const app = express();
 app.use(cors(corsOptions));
 
 app.use(express.json());
+
+app.use(cookieParser());
 
 app.use('/v1/users', userRouter);
 app.use('/v1/auth', authRouter);
