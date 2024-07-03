@@ -69,3 +69,11 @@ export const google = catchAsync(async (req, res, next) => {
     });
   }
 });
+
+export const signOut = (req, res, next) => {
+  res.clearCookie('access_token');
+  res.status(StatusCodes.OK).json({
+    status: 'success',
+    message: 'User  has been logged out',
+  });
+};
