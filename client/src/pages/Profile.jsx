@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useForm } from 'react-hook-form';
@@ -6,15 +6,37 @@ import { Input } from '~/components/input';
 import { useEffect, useRef, useState } from 'react';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app } from '~/config/firebase';
+import { updateUserFailure, updateUserStart, updateUserSuccess } from '~/redux/user/userSlice';
+import { toast } from 'react-toastify';
+import { Button } from '~/components/button';
 
-const schema = yup.object({
-  username: yup.string().required('This field is required'),
-  email: yup.string().email('Invalid email address').required('This field is required'),
-  password: yup.string().required('This field is required').min(8, 'Password must be 8 character'),
-});
+const schema = yup.object().shape(
+  {
+    username: yup
+      .string()
+      .required('This field is required')
+      .when('username', {
+        is: (value) => value?.length,
+        then: (rule) => rule.min(8, 'Username must be at least 8 characters'),
+      }),
+    email: yup.string().email('Invalid email address').required('This field is required'),
+    password: yup
+      .string()
+      .notRequired()
+      .when('password', {
+        is: (value) => value?.length,
+        then: (rule) => rule.min(8, 'Password must be at least 8 characters'),
+      }),
+  },
+  [
+    ['password', 'password'],
+    ['username', 'username'],
+  ]
+);
 
 export default function Profile() {
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, loading } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   // firebase storage
   // allow read;
@@ -26,7 +48,8 @@ export default function Profile() {
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
-  const [formData, setFormData] = useState({});
+  const [fileImage, setFileImage] = useState({});
+  console.log('🚀 ~ Profile ~ fileImage:', fileImage);
 
   useEffect(() => {
     if (file) {
@@ -62,7 +85,7 @@ export default function Profile() {
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setFormData({ ...formData, avatar: downloadURL });
+          setFileImage({ avatar: downloadURL });
         });
       }
     );
@@ -75,9 +98,40 @@ export default function Profile() {
   } = useForm({
     resolver: yupResolver(schema),
     mode: 'onSubmit',
+    defaultValues: {
+      username: currentUser.username,
+      email: currentUser.email,
+      avatar: currentUser.avatar,
+      password: '',
+    },
   });
-  const handleUpdateProfile = (values) => {
-    setFormData({ ...formData, ...values });
+  const handleUpdateProfile = async (values, e) => {
+    e.preventDefault();
+    const { password, ...rest } = values;
+    try {
+      dispatch(updateUserStart());
+      const res = await fetch(`http://localhost:3000/v1/users/update/${currentUser._id}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(
+          password === '' ? { ...rest, ...fileImage } : { ...values, ...fileImage }
+        ),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(updateUserFailure(data.message));
+        toast.error('Update user failed');
+        return;
+      }
+      dispatch(updateUserSuccess(data.user._doc));
+      toast.success('User updated successfully');
+    } catch (error) {
+      dispatch(updateUserFailure(error.message));
+      toast.error('Update user failed');
+    }
   };
 
   return (
@@ -92,7 +146,7 @@ export default function Profile() {
           accept='image/.*'
         />
         <img
-          src={formData.avatar || currentUser.avatar}
+          src={fileImage.avatar || currentUser.avatar}
           alt='avatar'
           className='self-center object-cover w-24 h-24 rounded-full cursor-pointer'
           onClick={() => fileRef.current.click()}
@@ -127,18 +181,12 @@ export default function Profile() {
           type='password'
           name='password'
         ></Input>
-        <button
-          type='submit'
-          className='p-3 text-white uppercase rounded-lg bg-slate-700 hover:opacity-95 disabled:opacity-50'
-        >
+        <Button disabled={loading} type='submit' isLoading={loading}>
           Update
-        </button>
-        <button
-          type='submit'
-          className='p-3 text-white uppercase bg-red-700 rounded-lg hover:opacity-95 disabled:opacity-50 '
-        >
+        </Button>
+        <Button className='bg-red-700' type='submit'>
           Create listing
-        </button>
+        </Button>
       </form>
       <div className='flex justify-end gap-3 mt-5'>
         <span className='p-2 text-white bg-red-700 rounded-md cursor-pointer hover:bg-red-500'>

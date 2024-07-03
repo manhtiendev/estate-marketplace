@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { signInFailure, signInStart, signInSuccess } from '~/redux/user/userSlice';
 import OAuth from '~/components/common/OAuth';
+import { Button } from '~/components/button';
 
 const schema = yup.object({
   email: yup.string().email('Invalid email address').required('This field is required'),
@@ -68,13 +69,9 @@ export default function SignIn() {
           type='password'
           name='password'
         ></Input>
-        <button
-          disabled={loading}
-          type='submit'
-          className='p-3 text-white uppercase rounded-lg bg-slate-700 hover:opacity-95 disabled:opacity-50'
-        >
-          {loading ? 'Loading...' : 'Sign In'}
-        </button>
+        <Button disabled={loading} isLoading={loading} type='submit'>
+          Sign in
+        </Button>
         <OAuth />
       </form>
       <div className='flex gap-2 mt-5 '>

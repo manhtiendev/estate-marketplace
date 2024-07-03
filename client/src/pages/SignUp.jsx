@@ -6,9 +6,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import OAuth from '~/components/common/OAuth';
+import { Button } from '~/components/button';
 
 const schema = yup.object({
-  username: yup.string().required('This field is required'),
+  username: yup
+    .string()
+    .required('This field is required')
+    .min(8, 'Username must be at least 8 characters'),
   email: yup.string().email('Invalid email address').required('This field is required'),
   password: yup.string().required('This field is required').min(8, 'Password must be 8 character'),
   passwordConfirmation: yup
@@ -18,8 +22,8 @@ const schema = yup.object({
 });
 
 export default function SignUp() {
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const {
     handleSubmit,
     control,
@@ -83,13 +87,9 @@ export default function SignUp() {
           name='passwordConfirmation'
           error={errors.passwordConfirmation?.message}
         ></Input>
-        <button
-          disabled={isLoading}
-          type='submit'
-          className='p-3 text-white uppercase rounded-lg bg-slate-700 hover:opacity-95 disabled:opacity-50'
-        >
-          {isLoading ? 'Loading...' : 'Sign Up'}
-        </button>
+        <Button disabled={isLoading} isLoading={isLoading} type='submit'>
+          Sign up
+        </Button>
         <OAuth />
       </form>
       <div className='flex gap-2 mt-5 '>

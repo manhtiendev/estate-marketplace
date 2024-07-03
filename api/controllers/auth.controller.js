@@ -11,7 +11,7 @@ export const verifyToken = catchAsync(async (req, res, next) => {
   const token = req.cookies.access_token;
   if (!token) return next(new ApiError(StatusCodes.UNAUTHORIZED, 'No token, authorization denied'));
   jwt.verify(token, env.JWT_SECRET, (err, user) => {
-    if (err) return next(new ApiError(StatusCodes.FORBIDDEN, 'Forbidden'));
+    if (err) return next(new ApiError(StatusCodes.FORBIDDEN, err.message));
     req.user = user;
     next();
   });
@@ -31,9 +31,7 @@ export const signin = catchAsync(async (req, res, next) => {
   if (!validUser) return next(new ApiError(StatusCodes.NOT_FOUND, 'User not found'));
   const validPassword = bcryptjs.compareSync(password, validUser.password);
   if (!validPassword) return next(new ApiError(StatusCodes.UNAUTHORIZED, 'Wrong credentials'));
-  const token = jwt.sign({ id: validUser._id }, env.JWT_SECRET, {
-    expiresIn: env.JWT_EXPIRES_IN,
-  });
+  const token = jwt.sign({ id: validUser._id }, env.JWT_SECRET);
   const { password: pass, ...rest } = validUser._doc;
   res.cookie('access_token', token, { httpOnly: true }).status(StatusCodes.OK).json({
     status: 'success',
@@ -44,9 +42,7 @@ export const signin = catchAsync(async (req, res, next) => {
 export const google = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
   if (user) {
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     const { password: pass, ...rest } = user._doc;
     res.cookie('access_token', token, { httpOnly: true }).status(StatusCodes.OK).json({
       status: 'success',
@@ -65,9 +61,7 @@ export const google = catchAsync(async (req, res, next) => {
       passwordConfirmation: hashedPassword,
       avatar: req.body.photo,
     });
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
     const { password: pass, ...rest } = newUser._doc;
     res.cookie('access_token', token, { httpOnly: true }).status(StatusCodes.OK).json({
       status: 'success',
