@@ -28,3 +28,15 @@ export const updateUser = catchAsync(async (req, res, next) => {
     user: rest,
   });
 });
+
+export const deleteUser = catchAsync(async (req, res, next) => {
+  if (req.user.id !== req.params.id) {
+    return next(new ApiError(StatusCodes.UNAUTHORIZED, 'You can only delete your own account'));
+  }
+  await User.findByIdAndDelete(req.params.id);
+  res.clearCookie('access_token');
+  res.status(StatusCodes.OK).json({
+    status: 'success',
+    message: 'User has been deleted',
+  });
+});

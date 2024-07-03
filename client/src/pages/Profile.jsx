@@ -6,7 +6,14 @@ import { Input } from '~/components/input';
 import { useEffect, useRef, useState } from 'react';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app } from '~/config/firebase';
-import { updateUserFailure, updateUserStart, updateUserSuccess } from '~/redux/user/userSlice';
+import {
+  deleteUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  updateUserFailure,
+  updateUserStart,
+  updateUserSuccess,
+} from '~/redux/user/userSlice';
 import { toast } from 'react-toastify';
 import { Button } from '~/components/button';
 
@@ -134,6 +141,27 @@ export default function Profile() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`http://localhost:3000/v1/users/delete/${currentUser._id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        toast.error('Delete user failed');
+        return;
+      }
+      dispatch(deleteUserSuccess());
+      toast.success(data.message);
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+      toast.error('Delete user failed');
+    }
+  };
+
   return (
     <div className='max-w-lg p-3 mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7 '>Profile</h1>
@@ -189,7 +217,10 @@ export default function Profile() {
         </Button>
       </form>
       <div className='flex justify-end gap-3 mt-5'>
-        <span className='p-2 text-white bg-red-700 rounded-md cursor-pointer hover:bg-red-500'>
+        <span
+          onClick={handleDeleteUser}
+          className='p-2 text-white bg-red-700 rounded-md cursor-pointer hover:bg-red-500'
+        >
           Delete Account
         </span>
         <span className='p-2 text-white bg-red-700 rounded-md cursor-pointer hover:bg-red-500'>
