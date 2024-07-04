@@ -4,6 +4,11 @@ import { Input } from '~/components/input';
 import * as yup from 'yup';
 import { Textarea } from '~/components/textarea';
 import { Button } from '~/components/button';
+import { useState } from 'react';
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+import { app } from '~/config/firebase';
+import { toast } from 'react-toastify';
+import { v4 } from 'uuid';
 
 const schema = yup.object().shape({
   name: yup
@@ -49,6 +54,57 @@ export default function CreateListing() {
     resolver: yupResolver(schema),
     mode: 'onSubmit',
   });
+  const [files, setFiles] = useState([]);
+  const [imageUrls, setImageUrls] = useState([]);
+  const [loadingImage, setLoadingImage] = useState(false);
+
+  const handleImageSubmit = () => {
+    if (files.length > 0 && files.length + imageUrls.length < 7) {
+      setLoadingImage(true);
+      const promises = [];
+      for (let i = 0; i < files.length; i++) {
+        promises.push(storeImage(files[i]));
+      }
+      Promise.all(promises)
+        .then((urls) => {
+          setImageUrls([...imageUrls, ...urls]);
+          toast.success('Image successfully uploaded');
+          setLoadingImage(false);
+        })
+        .catch((err) => {
+          toast.error('Failed to upload image');
+          setLoadingImage(false);
+          console.log(err);
+        });
+    } else {
+      toast.error('You can only upload 6 images per listing');
+      setLoadingImage(false);
+    }
+  };
+  const storeImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const storage = getStorage(app);
+      const fileName = new Date().getTime() + file.name;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on(
+        'state_changed',
+        () => {},
+        (error) => {
+          reject(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            resolve(downloadURL);
+          });
+        }
+      );
+    });
+  };
+  const handleRemoveImage = (index) => {
+    setImageUrls(imageUrls.filter((_, i) => i !== index));
+  };
+
   const handleCreateListing = (values) => {
     console.log(values);
   };
@@ -163,11 +219,37 @@ export default function CreateListing() {
               id='images'
               accept='image/.*'
               multiple
+              onChange={(e) => {
+                setFiles(e.target.files);
+              }}
             />
-            <button className='p-3 text-green-700 uppercase border border-green-700 rounded hover:shadow-lg disabled:opacity-80'>
+            <Button
+              type='button'
+              onClick={handleImageSubmit}
+              className='w-full bg-green-700 max-w-[84px]'
+              isLoading={loadingImage}
+              disabled={loadingImage}
+            >
               Upload
-            </button>
+            </Button>
           </div>
+          {imageUrls.length > 0 &&
+            imageUrls.map((item, index) => (
+              <div key={v4()} className='flex items-center justify-between p-3 border rounded'>
+                <img
+                  src={item}
+                  alt='Listing image'
+                  className='object-contain w-20 h-20 rounded-lg'
+                />
+                <Button
+                  onClick={() => handleRemoveImage(index)}
+                  type='button'
+                  className='bg-red-700'
+                >
+                  Delete
+                </Button>
+              </div>
+            ))}
           <Button type='submit'>Create Listing</Button>
         </div>
       </form>

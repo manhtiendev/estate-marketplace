@@ -60,7 +60,6 @@ export default function Profile() {
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [fileImage, setFileImage] = useState({});
-  console.log('🚀 ~ Profile ~ fileImage:', fileImage);
 
   useEffect(() => {
     if (file) {
