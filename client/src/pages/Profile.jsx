@@ -19,6 +19,7 @@ import {
 } from '~/redux/user/userSlice';
 import { toast } from 'react-toastify';
 import { Button } from '~/components/button';
+import { Link } from 'react-router-dom';
 
 const schema = yup.object().shape(
   {
@@ -235,9 +236,11 @@ export default function Profile() {
         <Button disabled={loading} type='submit' isLoading={loading}>
           Update
         </Button>
-        <Button className='bg-red-700' type='submit'>
-          Create listing
-        </Button>
+        <Link to='/create-listing'>
+          <Button className='w-full bg-green-700' type='submit'>
+            Create listing
+          </Button>
+        </Link>
       </form>
       <div className='flex justify-end gap-3 mt-5'>
         <span

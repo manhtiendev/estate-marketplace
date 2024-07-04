@@ -8,12 +8,13 @@ export default function Input({
   error = '',
   placeholder = '',
   children,
+  className = '',
   ...rest
 }) {
   const { field } = useController({
     control,
     name,
-    defaultValue: '',
+    defaultValue: type === 'number' ? 1 : '',
   });
   return (
     <div className='relative'>
@@ -21,7 +22,7 @@ export default function Input({
         type={type}
         id={name}
         placeholder={placeholder}
-        className='w-full p-3 border rounded-lg'
+        className={`w-full p-3 border rounded-lg outline-none ${className}`}
         {...field}
         {...rest}
       />
@@ -46,4 +47,5 @@ Input.propTypes = {
   placeholder: PropTypes.string,
   error: PropTypes.string,
   children: PropTypes.node,
+  className: PropTypes.string,
 };

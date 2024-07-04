@@ -20,12 +20,12 @@ const listingSchema = new mongoose.Schema(
     regularPrice: {
       type: Number,
       required: [true, 'A listing must have a price'],
-      min: [0.01, 'Listing price must be greater or equal then 0.01'],
+      min: [1, 'Listing price must be greater or equal then 1'],
     },
     discountPrice: {
       type: Number,
       required: [true, 'A listing must have a discount price'],
-      min: [0.01, 'Listing discount price must be greater or equal then 0.01'],
+      min: [1, 'Listing discount price must be greater or equal then 1'],
       validate: {
         validator: function (val) {
           return val <= this.regularPrice;
@@ -33,12 +33,12 @@ const listingSchema = new mongoose.Schema(
         message: 'Discount price ({VALUE}) should be below or equal regular price',
       },
     },
-    bathRooms: {
+    bathrooms: {
       type: Number,
       required: [true, 'A listing must have a number of bathrooms'],
       min: [1, 'A listing must have at least 1 bathroom'],
     },
-    bedRooms: {
+    bedrooms: {
       type: Number,
       required: [true, 'A listing must have a number of bedrooms'],
       min: [1, 'A listing must have at least 1 bedroom'],
