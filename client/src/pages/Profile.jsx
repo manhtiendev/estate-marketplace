@@ -20,6 +20,7 @@ import {
 import { toast } from 'react-toastify';
 import { Button } from '~/components/button';
 import { Link } from 'react-router-dom';
+import { v4 } from 'uuid';
 
 const schema = yup.object().shape(
   {
@@ -60,6 +61,7 @@ export default function Profile() {
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [fileImage, setFileImage] = useState({});
+  const [userListing, setUserListing] = useState([]);
 
   useEffect(() => {
     if (file) {
@@ -185,8 +187,29 @@ export default function Profile() {
     }
   };
 
+  const handleShowListings = async () => {
+    try {
+      const res = await fetch(`http://localhost:3000/v1/users/listings/${currentUser._id}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        toast.error('Error showing listings');
+        return;
+      }
+      setUserListing(data.listings);
+    } catch (error) {
+      toast.error('Error showing listings');
+      console.log(error);
+    }
+  };
+
   return (
-    <div className='max-w-lg p-3 mx-auto'>
+    <div className='max-w-lg p-3 mx-auto mb-7'>
       <h1 className='text-3xl font-semibold text-center my-7 '>Profile</h1>
       <form className={`flex flex-col gap-6`} onSubmit={handleSubmit(handleUpdateProfile)}>
         <input
@@ -243,6 +266,12 @@ export default function Profile() {
       </form>
       <div className='flex justify-end gap-3 mt-5'>
         <span
+          onClick={handleShowListings}
+          className='p-2 text-white bg-green-700 rounded-md cursor-pointer hover:bg-red-500'
+        >
+          Show Listing
+        </span>
+        <span
           onClick={handleDeleteUser}
           className='p-2 text-white bg-red-700 rounded-md cursor-pointer hover:bg-red-500'
         >
@@ -255,6 +284,34 @@ export default function Profile() {
           Sign out
         </span>
       </div>
+      {userListing && userListing.length > 0 && (
+        <div className='flex flex-col gap-3 my-7'>
+          <h1 className='text-2xl font-semibold text-center mb-7'>Your Listings</h1>
+          {userListing.map((listing) => (
+            <div
+              key={v4()}
+              className='flex items-center justify-between gap-3 p-3 border rounded-lg'
+            >
+              <Link className='flex items-center gap-3' to={`/listing/${listing._id}`}>
+                <img
+                  src={listing.imageUrls[0]}
+                  alt='listing cover'
+                  className='object-contain w-16 h-16 rounded-lg'
+                />
+                <p className='flex-1 font-semibold truncate hover:underline'>{listing.name}</p>
+              </Link>
+              <div className='flex flex-col items-center gap-2'>
+                <Button type='button' className='bg-red-500 w-full max-w-[84px] p-1'>
+                  Delete
+                </Button>
+                <Button type='button' className='w-full max-w-[84px] bg-slate-500 p-1'>
+                  Edit
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
