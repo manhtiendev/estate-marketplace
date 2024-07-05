@@ -13,7 +13,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <PersistGate loading={null} persistor={persistor}>
       <BrowserRouter>
         <App />
-        <ToastContainer theme='colored' bodyClassName='text-sm' />
+        <ToastContainer theme='colored' position='bottom-right' bodyClassName='text-sm' />
       </BrowserRouter>
     </PersistGate>
   </Provider>

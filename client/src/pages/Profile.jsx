@@ -62,6 +62,9 @@ export default function Profile() {
   const [fileUploadError, setFileUploadError] = useState(false);
   const [fileImage, setFileImage] = useState({});
   const [userListing, setUserListing] = useState([]);
+  const [showListing, setShowListing] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [idListingDelete, setIdListingDelete] = useState('');
 
   useEffect(() => {
     if (file) {
@@ -208,8 +211,69 @@ export default function Profile() {
     }
   };
 
+  const handleDeleteListing = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:3000/v1/listing/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        toast.error('Error deleting listing');
+        setShowConfirmation(false);
+        return;
+      }
+      setUserListing((prev) => prev.filter((listing) => listing._id !== id));
+      setShowConfirmation(false);
+      setIdListingDelete('');
+      toast.success('Listing deleted successfully');
+    } catch (error) {
+      toast.error('Error deleting listing');
+      setIdListingDelete('');
+      console.log(error);
+      setShowConfirmation(false);
+    }
+  };
+
+  // Dialog
+
+  const handleCancel = () => {
+    toast.done('Delete cancelled!');
+    setShowConfirmation(false);
+    setIdListingDelete('');
+  };
+
   return (
     <div className='max-w-lg p-3 mx-auto mb-7'>
+      {/* Dialog */}
+      <div>
+        {showConfirmation && (
+          <div className='fixed inset-0 flex items-center justify-center'>
+            <div className='p-8 bg-white rounded-lg'>
+              <p>Are you sure you want to delete?</p>
+              <div className='flex justify-end mt-4'>
+                <button
+                  type='button'
+                  className='px-4 py-2 mr-2 text-white bg-red-500 rounded'
+                  onClick={() => handleDeleteListing(idListingDelete)}
+                >
+                  Confirm
+                </button>
+                <button
+                  type='button'
+                  className='px-4 py-2 bg-gray-300 rounded'
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
       <h1 className='text-3xl font-semibold text-center my-7 '>Profile</h1>
       <form className={`flex flex-col gap-6`} onSubmit={handleSubmit(handleUpdateProfile)}>
         <input
@@ -266,7 +330,10 @@ export default function Profile() {
       </form>
       <div className='flex justify-end gap-3 mt-5'>
         <span
-          onClick={handleShowListings}
+          onClick={() => {
+            handleShowListings();
+            setShowListing(!showListing);
+          }}
           className='p-2 text-white bg-green-700 rounded-md cursor-pointer hover:bg-red-500'
         >
           Show Listing
@@ -284,7 +351,7 @@ export default function Profile() {
           Sign out
         </span>
       </div>
-      {userListing && userListing.length > 0 && (
+      {showListing && userListing && userListing.length > 0 && (
         <div className='flex flex-col gap-3 my-7'>
           <h1 className='text-2xl font-semibold text-center mb-7'>Your Listings</h1>
           {userListing.map((listing) => (
@@ -301,10 +368,17 @@ export default function Profile() {
                 <p className='flex-1 font-semibold truncate hover:underline'>{listing.name}</p>
               </Link>
               <div className='flex flex-col items-center gap-2'>
-                <Button type='button' className='bg-red-500 w-full max-w-[84px] p-1'>
+                <Button
+                  onClick={() => {
+                    setShowConfirmation(true);
+                    setIdListingDelete(listing._id);
+                  }}
+                  type='button'
+                  className='bg-red-500 w-full max-w-[84px] !p-1'
+                >
                   Delete
                 </Button>
-                <Button type='button' className='w-full max-w-[84px] bg-slate-500 p-1'>
+                <Button type='button' className='w-full max-w-[84px] bg-slate-500 !p-1'>
                   Edit
                 </Button>
               </div>
