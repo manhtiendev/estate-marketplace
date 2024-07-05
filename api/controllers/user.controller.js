@@ -3,6 +3,7 @@ import ApiError from '~/utils/ApiError';
 import catchAsync from '~/utils/catchAsync';
 import bcryptjs from 'bcryptjs';
 import User from '~/models/user.model';
+import Listing from '~/models/listing.model';
 
 export const updateUser = catchAsync(async (req, res, next) => {
   if (req.user.id !== req.params.id)
@@ -38,5 +39,16 @@ export const deleteUser = catchAsync(async (req, res, next) => {
   res.status(StatusCodes.OK).json({
     status: 'success',
     message: 'User has been deleted',
+  });
+});
+
+export const getUserListings = catchAsync(async (req, res, next) => {
+  if (req.user.id !== req.params.id) {
+    return next(new ApiError(StatusCodes.UNAUTHORIZED, 'You can only view your own listing'));
+  }
+  const listings = await Listing.find({ userRef: req.params.id });
+  res.status(StatusCodes.OK).json({
+    status: 'success',
+    listings,
   });
 });
