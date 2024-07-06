@@ -6,12 +6,17 @@ import SwiperCore from 'swiper';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css/bundle';
 import { FaBath, FaBed, FaChair, FaParking } from 'react-icons/fa';
+import { Button } from '~/components/button';
+import { useSelector } from 'react-redux';
+import { Contact } from '~/components/contact';
 
 export default function Listing() {
   SwiperCore.use([Navigation]);
+  const { currentUser } = useSelector((state) => state.user);
   const [listing, setListing] = useState([]);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [contact, setContact] = useState(false);
   const params = useParams();
 
   useEffect(() => {
@@ -72,7 +77,7 @@ export default function Listing() {
               viewBox='0 0 24 24'
               strokeWidth={1.5}
               stroke='currentColor'
-              className='w-6 h-6 text-slate-500'
+              className='w-6 h-6 mr-1 text-slate-500'
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
                 setCopied(true);
@@ -93,10 +98,7 @@ export default function Listing() {
           )}
           <div className='flex flex-col max-w-4xl gap-4 p-3 mx-auto my-7'>
             <p className='text-2xl font-semibold'>
-              {listing.name} - ${' '}
-              {listing.offer
-                ? listing.discountedPrice.toLocaleString('en-US')
-                : listing.regularPrice.toLocaleString('en-US')}
+              {listing.name} - $ {listing.offer ? +listing.discountPrice : +listing.regularPrice}
               {listing.type === 'rent' && ' / month'}
             </p>
             <p className='flex items-center gap-2 mt-4 text-sm text-slate-600'>
@@ -145,6 +147,10 @@ export default function Listing() {
                 {listing.furnished ? 'Furnished' : 'Unfurnished'}
               </li>
             </ul>
+            {currentUser && listing.userRef !== currentUser._id && !contact && (
+              <Button onClick={() => setContact(true)}>Contact landlord</Button>
+            )}
+            {contact && <Contact listing={listing} />}
           </div>
         </div>
       )}

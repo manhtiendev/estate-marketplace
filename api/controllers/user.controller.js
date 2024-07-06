@@ -5,6 +5,18 @@ import bcryptjs from 'bcryptjs';
 import User from '~/models/user.model';
 import Listing from '~/models/listing.model';
 
+export const getUser = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) return next(new ApiError(StatusCodes.NOT_FOUND, 'User not found'));
+  const { password: pass, ...rest } = user._doc;
+
+  res.status(StatusCodes.OK).json({
+    status: 'success',
+    user: rest,
+  });
+});
+
 export const updateUser = catchAsync(async (req, res, next) => {
   if (req.user.id !== req.params.id)
     return next(new ApiError(StatusCodes.UNAUTHORIZED, 'You can only update your own account'));
