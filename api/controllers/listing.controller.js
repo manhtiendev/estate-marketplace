@@ -3,6 +3,17 @@ import Listing from '~/models/listing.model';
 import ApiError from '~/utils/ApiError';
 import catchAsync from '~/utils/catchAsync';
 
+export const getListing = catchAsync(async (req, res, next) => {
+  const listing = await Listing.findById(req.params.id);
+  if (!listing) {
+    return next(new ApiError(StatusCodes.NOT_FOUND, 'No listing found'));
+  }
+  res.status(StatusCodes.OK).json({
+    status: 'success',
+    data: listing,
+  });
+});
+
 export const createListing = catchAsync(async (req, res, next) => {
   const newListing = await Listing.create(req.body);
   res.status(StatusCodes.CREATED).json({
@@ -36,7 +47,6 @@ export const updateListing = catchAsync(async (req, res, next) => {
   }
   const updatedListing = await Listing.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
-    runValidators: true,
   });
   res.status(StatusCodes.OK).json({
     status: 'success',

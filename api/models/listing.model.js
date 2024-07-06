@@ -24,7 +24,7 @@ const listingSchema = new mongoose.Schema(
     },
     discountPrice: {
       type: Number,
-      min: [0, 'Listing discount price must be greater or equal then 1'],
+      min: [0, 'Listing discount price must be greater or equal then 0'],
       default: 0,
       validate: {
         validator: function (val) {

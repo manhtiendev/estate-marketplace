@@ -379,7 +379,7 @@ export default function Profile() {
                   Delete
                 </Button>
                 <Button type='button' className='w-full max-w-[84px] bg-slate-500 !p-1'>
-                  Edit
+                  <Link to={`/update-listing/${listing._id}`}>Edit</Link>
                 </Button>
               </div>
             </div>

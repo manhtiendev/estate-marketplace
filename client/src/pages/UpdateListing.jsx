@@ -4,13 +4,13 @@ import { Input } from '~/components/input';
 import * as yup from 'yup';
 import { Textarea } from '~/components/textarea';
 import { Button } from '~/components/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app } from '~/config/firebase';
 import { toast } from 'react-toastify';
 import { v4 } from 'uuid';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const schema = yup.object().shape({
   name: yup
@@ -48,9 +48,36 @@ const schema = yup.object().shape({
   offer: yup.boolean().required(),
 });
 
-export default function CreateListing() {
+export default function UpdateListing() {
+  const [files, setFiles] = useState([]);
+  const [listing, setListing] = useState({});
+  const [imageUrls, setImageUrls] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingImage, setLoadingImage] = useState(false);
+  const [selectedOption, setSelectedOption] = useState('');
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const params = useParams();
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      const { id } = params;
+      const res = await fetch(`http://localhost:3000/v1/listing/${id}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const { data } = await res.json();
+      if (data.success === false) {
+        toast.error('Get listing failed');
+        return;
+      }
+      setListing(data);
+    };
+    fetchListing();
+  }, [params]);
 
   const {
     register,
@@ -60,23 +87,31 @@ export default function CreateListing() {
     watch,
     formState: { errors },
   } = useForm({
-    defaultValues: {
-      name: '',
-      description: '',
-      address: '',
-      bedrooms: 1,
-      bathrooms: 1,
-      regularPrice: 1,
-      discountPrice: 0,
-    },
     resolver: yupResolver(schema),
     mode: 'onSubmit',
   });
-  const [files, setFiles] = useState([]);
-  const [imageUrls, setImageUrls] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingImage, setLoadingImage] = useState(false);
-  const [selectedOption, setSelectedOption] = useState('sale');
+
+  useEffect(() => {
+    if (!listing) {
+      toast.success('Loading...');
+    } else {
+      reset({
+        name: listing.name,
+        description: listing.description,
+        address: listing.address,
+        bedrooms: listing.bedrooms,
+        bathrooms: listing.bathrooms,
+        regularPrice: listing.regularPrice,
+        discountPrice: listing.discountPrice,
+        parking: listing.parking,
+        furnished: listing.furnished,
+        offer: listing.offer,
+      });
+      setSelectedOption(listing.type);
+      setImageUrls(listing.imageUrls);
+    }
+  }, [listing, reset]);
+
   const regularPrice = watch('regularPrice');
   const discountPrice = watch('discountPrice');
   const offer = watch('offer');
@@ -135,7 +170,7 @@ export default function CreateListing() {
     }
   };
 
-  const handleCreateListing = async (values) => {
+  const handleUpdateListing = async (values) => {
     try {
       if (imageUrls.length < 1) {
         toast.error('You must upload at least one image');
@@ -155,9 +190,9 @@ export default function CreateListing() {
         imageUrls: imageUrls,
         discountPrice: +setDiscountedPrice,
       };
-      console.log('🚀 ~ handleCreateListing ~ formData:', formData);
-      const res = await fetch('http://localhost:3000/v1/listing', {
-        method: 'POST',
+      console.log(formData);
+      const res = await fetch(`http://localhost:3000/v1/listing/${params.id}`, {
+        method: 'PATCH',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -183,9 +218,9 @@ export default function CreateListing() {
 
   return (
     <main className='max-w-4xl p-3 mx-auto mb-7'>
-      <h1 className='text-3xl font-semibold text-center my-7'>Create a Listing</h1>
+      <h1 className='text-3xl font-semibold text-center my-7'>Update a Listing</h1>
       <form
-        onSubmit={handleSubmit(handleCreateListing)}
+        onSubmit={handleSubmit(handleUpdateListing)}
         className='flex flex-col gap-4 sm:flex-row'
       >
         <div className='flex flex-col flex-1 gap-6'>
@@ -233,15 +268,15 @@ export default function CreateListing() {
               <span>Rent</span>
             </div>
             <div className='flex gap-2'>
-              <input type='checkbox' {...register('parking')} id='parking' className='w-5 ' />
+              <input type='checkbox' {...register('parking')} id='parking' className='w-5' />
               <span>Parking spot</span>
             </div>
             <div className='flex gap-2'>
-              <input type='checkbox' {...register('furnished')} id='furnished' className='w-5 ' />
+              <input type='checkbox' {...register('furnished')} id='furnished' className='w-5' />
               <span>Furnished</span>
             </div>
             <div className='flex gap-2'>
-              <input type='checkbox' {...register('offer')} id='offer' className='w-5 ' />
+              <input type='checkbox' {...register('offer')} id='offer' className='w-5' />
               <span>Offer</span>
             </div>
           </div>
@@ -319,7 +354,8 @@ export default function CreateListing() {
               Upload
             </Button>
           </div>
-          {imageUrls.length > 0 &&
+          {imageUrls &&
+            imageUrls.length > 0 &&
             imageUrls.map((item, index) => (
               <div key={v4()} className='flex items-center justify-between p-3 border rounded'>
                 <img
@@ -337,7 +373,7 @@ export default function CreateListing() {
               </div>
             ))}
           <Button type='submit' isLoading={loading} disabled={loadingImage || loading}>
-            Create Listing
+            Update Listing
           </Button>
         </div>
       </form>
