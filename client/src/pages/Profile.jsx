@@ -65,6 +65,7 @@ export default function Profile() {
   const [showListing, setShowListing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [idListingDelete, setIdListingDelete] = useState('');
+  const [uploadImageLoading, setUploadImageLoading] = useState(false);
 
   useEffect(() => {
     if (file) {
@@ -74,6 +75,7 @@ export default function Profile() {
   }, [file]);
 
   const handleFileUpload = async (file) => {
+    setUploadImageLoading(true);
     const storage = getStorage(app);
     const fileName = new Date().getTime() + file.name;
     const storageRef = ref(storage, fileName);
@@ -97,11 +99,13 @@ export default function Profile() {
       },
       () => {
         setFileUploadError(true);
+        setUploadImageLoading(false);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setFileImage({ avatar: downloadURL });
         });
+        setUploadImageLoading(false);
       }
     );
   };
@@ -319,7 +323,7 @@ export default function Profile() {
           type='password'
           name='password'
         ></Input>
-        <Button disabled={loading} type='submit' isLoading={loading}>
+        <Button disabled={uploadImageLoading || loading} type='submit' isLoading={loading}>
           Update
         </Button>
         <Link to='/create-listing'>
