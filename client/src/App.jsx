@@ -11,6 +11,7 @@ import CreateListing from './pages/CreateListing';
 import UpdateListing from './pages/UpdateListing';
 import Listing from './pages/Listing';
 import Search from './pages/Search';
+import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route path='/create-listing' element={<CreateListing />}></Route>
           <Route path='/update-listing/:id' element={<UpdateListing />}></Route>
         </Route>
+        <Route path='*' element={<NotFound />} /> {/* Add the 404 route */}
       </Routes>
     </>
   );
