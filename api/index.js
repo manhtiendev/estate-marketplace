@@ -8,6 +8,7 @@ import { corsOptions } from './config/cors';
 import { env } from './config/environment';
 import cookieParser from 'cookie-parser';
 import ApiError from '~/utils/ApiError';
+import path from 'path';
 
 mongoose
   .connect(env.MONGO_URI)
@@ -15,6 +16,8 @@ mongoose
     console.log('Connected to MongoDB!');
   })
   .catch((err) => console.log(err));
+
+const __dirname = path.resolve();
 
 const app = express();
 
@@ -27,6 +30,11 @@ app.use(cookieParser());
 app.use('/v1/users', userRouter);
 app.use('/v1/auth', authRouter);
 app.use('/v1/listing', listingRouter);
+
+app.use(express.static(path.join(__dirname, '/client/dist')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+});
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
