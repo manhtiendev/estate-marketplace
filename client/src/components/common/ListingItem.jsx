@@ -5,11 +5,11 @@ import { FaBath, FaBed } from 'react-icons/fa';
 
 export default function ListingItem({ listing }) {
   return (
-    <div className='overflow-hidden transition-shadow bg-white rounded-lg w-full sm:w-[250px] shadow-md hover:shadow-lg'>
+    <div className='overflow-hidden transition-shadow bg-white rounded-lg w-full lg:w-[250px] shadow-md hover:shadow-lg'>
       <Link to={`/listing/${listing._id}`}>
         <img
           src={listing.imageUrls[0]}
-          className='object-cover w-full h-[320px] sm:h-[150px] hover:scale-105 transition-scale duration-300'
+          className='object-cover w-full h-[320px] lg:h-[150px] hover:scale-105 transition-scale duration-300'
           alt='listing-cover'
         />
         <div className='flex flex-col w-full gap-2 p-3'>

@@ -2,7 +2,11 @@
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        xl: '1200px',
+      },
+    },
   },
   plugins: [import('@tailwindcss/line-clamp')],
 };
