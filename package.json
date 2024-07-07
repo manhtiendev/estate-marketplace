@@ -7,7 +7,7 @@
     "lint": "eslint api --ext js --report-unused-disable-directives --max-warnings 0",
     "clean": "rm -rf build && mkdir build",
     "build-babel": "babel ./api -d ./build/api",
-    "build": "yarn install && yarn install --prefix client && yarn build --prefix client",
+    "build": "npm install && npm install --prefix client && npm run build --prefix client",
     "production": "npm run build && cross-env BUILD_MODE=production node ./build/api/index.js",
     "dev": "cross-env BUILD_MODE=dev nodemon --exec babel-node ./api/index.js"
   },
