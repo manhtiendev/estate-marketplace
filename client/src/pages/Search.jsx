@@ -14,9 +14,12 @@ export default function Search() {
     offer: false,
     sort: 'createdAt',
     order: 'desc',
+    limit: 6,
   });
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
+  const [showMore, setShowMore] = useState(false);
+  const [visibleItems, setVisibleItems] = useState(6);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -60,10 +63,16 @@ export default function Search() {
           },
         });
         const data = await res.json();
+
         if (data.success === false) {
           toast.error('Get listing failed');
           setLoading(false);
           return;
+        }
+        if (data.listings.length > 6) {
+          setShowMore(true);
+        } else {
+          setShowMore(false);
         }
         setListings(data.listings);
         setLoading(false);
@@ -119,6 +128,35 @@ export default function Search() {
     urlParams.set('order', sidebarData.order);
     const searchQuery = urlParams.toString();
     navigate(`?${searchQuery}`);
+  };
+
+  // const onShowMoreClick = async () => {
+  //   const numberOfListings = listings.length;
+  //   const startIndex = numberOfListings;
+  //   const urlParams = new URLSearchParams(location.search);
+  //   urlParams.set('startIndex', startIndex);
+  //   const searchQuery = urlParams.toString();
+  //   try {
+  //     const res = await fetch(`http://localhost:3000/v1/listing?${searchQuery}`, {
+  //       method: 'GET',
+  //       credentials: 'include',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+  //     const data = await res.json();
+  //     if (data.listings.length < 6) {
+  //       setShowMore(false);
+  //     }
+  //     setListings([...listings, ...data.listings]);
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error('Something went wrong!');
+  //     setLoading(false);
+  //   }
+  // };
+  const onShowMoreClick = async () => {
+    setVisibleItems(visibleItems + 6);
   };
 
   return (
@@ -235,8 +273,19 @@ export default function Search() {
           )}
           {!loading &&
             listings &&
-            listings.map((listing) => <ListingItem key={listing._id} listing={listing} />)}
+            listings
+              .slice(0, visibleItems)
+              .map((listing) => <ListingItem key={listing._id} listing={listing} />)}
         </div>
+        {showMore && visibleItems < listings.length && (
+          <Button
+            type='button'
+            onClick={onShowMoreClick}
+            className='mx-auto mb-7 !text-green-700 bg-transparent border-green-700 border'
+          >
+            Show more
+          </Button>
+        )}
       </div>
     </div>
   );
