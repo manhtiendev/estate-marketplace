@@ -81,7 +81,7 @@ export default function Home() {
           Our expert support are always available.
         </div>
         <Link className='text-xs font-bold text-blue-600 sm:text-sm hover:underline' to='/search'>
-          Let's Start now...
+          Let&apos;s Start now...
         </Link>
       </div>
       {/* Swiper */}
