@@ -19,7 +19,6 @@ export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
-  console.log('🚀 ~ Header ~ searchTerm:', searchTerm);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -35,7 +34,7 @@ export default function Header() {
     if (searchTermFromUrl) {
       setSearchTerm(searchTermFromUrl);
     }
-  }, []);
+  }, [location.search]);
 
   return (
     <header className='shadow-md bg-slate-200 '>

@@ -45,7 +45,7 @@ export const getListings = catchAsync(async (req, res, next) => {
   res.status(StatusCodes.OK).json({
     status: 'success',
     results: listings.length,
-    data: listings,
+    listings,
   });
 });
 
